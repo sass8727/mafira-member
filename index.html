@@ -553,8 +553,25 @@ async function submitAuth(){
     if(mode==='register'){
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
       if(error) throw error;
-      if(data.session){enterPortal(data.user);}
-      else{showMsg('Akun berhasil dibuat! Silakan masuk.','ok');switchMode('login');}
+
+if(data.user){
+   const { error: profileError } =
+      await sb.from('profiles').insert({
+         id: data.user.id,
+         full_name: name
+      });
+
+   if(profileError){
+      console.error(profileError);
+   }
+}
+
+if(data.session){
+   enterPortal(data.user);
+}
+else{
+   showMsg('Akun berhasil dibuat! Silakan masuk.','ok');
+   switchMode('login');}
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
       if(error) throw error;
