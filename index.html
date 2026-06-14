@@ -661,8 +661,11 @@ async function enterPortal(user){
 console.log("WHOAMI", whoami);
 console.log("SUMMARY", summary);
 console.log("ERROR", error);
+     console.log("MASUK IF TEST");
 
-  if (!error && summary) {
+  console.log("SUMMARY TYPE", typeof summary);
+
+if (summary) {
 
     if ($("#homePoints"))
       $("#homePoints").textContent =
