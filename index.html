@@ -307,6 +307,13 @@ body{
       <label>Password</label>
       <input type="password" id="inpPass" placeholder="Minimal 6 karakter" autocomplete="current-password">
     </div>
+     <div class="field">
+  <label>Kode Referral (opsional)</label>
+  <input
+    type="text"
+    id="inpReferral"
+    placeholder="Masukkan kode referral">
+</div>
 
     <button class="auth-btn" id="authBtn" onclick="submitAuth()">Masuk</button>
 
@@ -569,7 +576,18 @@ async function submitAuth(){
   const btn=$('authBtn');btn.disabled=true;const orig=btn.textContent;btn.textContent='Memproses…';
   try{
     if(mode==='register'){
-      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+       const referralCode =
+  $('inpReferral')?.value.trim().toUpperCase() || '';
+      const {data,error}=await sb.auth.signUp({
+  email,
+  password:pass,
+  options:{
+    data:{
+      full_name:name,
+      referral_code_used: referralCode
+    }
+  }
+});
       if(error) throw error;
       if(data.session){enterPortal(data.user);}
       else{showMsg('Akun berhasil dibuat! Silakan masuk.','ok');switchMode('login');}
