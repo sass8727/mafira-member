@@ -659,6 +659,8 @@ async function enterPortal(user){
   await sb.rpc("who_am_i");
 
 console.log("WHOAMI", whoami);
+console.log("SUMMARY", summary);
+console.log("ERROR", error);
 
   if (!error && summary) {
 
