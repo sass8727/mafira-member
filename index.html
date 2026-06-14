@@ -668,9 +668,10 @@ console.log("ERROR", error);
       $("#homePoints").textContent =
         (summary.lifetime || 0).toLocaleString("id-ID");
 
-    if ($("#homeReferrals"))
-      $("#homeReferrals").textContent =
-        summary.referral_active || 0;
+ if($("#homeReferrals")){
+  console.log("SETTING REFERRAL", summary.referral_active);
+  $("#homeReferrals").textContent = "999";
+}
 
     if ($("#homeCommission"))
       $("#homeCommission").textContent =
