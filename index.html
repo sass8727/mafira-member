@@ -651,6 +651,31 @@ async function enterPortal(user){
   // Level & poin dari database
   const level  = profile.level  ?? 'Mitra Gold';
   const points = profile.points ?? 0;
+   try {
+
+  const { data: summary, error } =
+    await sb.rpc('get_my_summary');
+
+  if(!error && summary){
+
+    if($('#homePoints'))
+      $('#homePoints').textContent =
+        (summary.lifetime || 0).toLocaleString('id-ID');
+
+    if($('#homeReferrals'))
+      $('#homeReferrals').textContent =
+        summary.referral_active || 0;
+
+    if($('#homeCommission'))
+      $('#homeCommission').textContent =
+        'Rp ' + ((summary.spendable || 0) * 1000)
+          .toLocaleString('id-ID');
+
+  }
+
+}catch(e){
+  console.warn(e);
+}
    if ($('heroPoints')) {
   $('heroPoints').textContent =
     points.toLocaleString('id-ID');
