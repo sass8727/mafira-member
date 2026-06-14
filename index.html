@@ -553,25 +553,8 @@ async function submitAuth(){
     if(mode==='register'){
       const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
       if(error) throw error;
-
-if(data.user){
-   const { error: profileError } =
-      await sb.from('profiles').insert({
-         id: data.user.id,
-         full_name: name
-      });
-
-   if(profileError){
-      console.error(profileError);
-   }
-}
-
-if(data.session){
-   enterPortal(data.user);
-}
-else{
-   showMsg('Akun berhasil dibuat! Silakan masuk.','ok');
-   switchMode('login');}
+      if(data.session){enterPortal(data.user);}
+      else{showMsg('Akun berhasil dibuat! Silakan masuk.','ok');switchMode('login');}
     }else{
       const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
       if(error) throw error;
@@ -586,21 +569,77 @@ else{
   }finally{btn.disabled=false;btn.textContent=orig;}
 }
 
-function enterPortal(user){
-  const name=(user?.user_metadata?.full_name)||(user?.email?.split('@')[0])||'Rio Kurniawan';
-  const initial=name.trim().charAt(0).toUpperCase()||'R';
-  $('hiName').textContent=name.split(' ')[0];
-  $('heroName').textContent=name;
-  $('heroAv').textContent=initial;
-  $('pName').textContent=name;
-  $('pAv').textContent=initial;
-  if(user?.email){$('pEmail').textContent=user.email;$('fEmail').value=user.email;}
-  $('fName').value=name;
-  $('inpPass').value='';
+async function enterPortal(user){
+  // Ambil data profil dari Supabase
+  let profile = {};
+  try {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+    if (!error && data) profile = data;
+  } catch(e) { console.warn('Gagal mengambil profil:', e); }
+
+  // Nama & initial
+  const name = profile.full_name
+    || user?.user_metadata?.full_name
+    || user?.email?.split('@')[0]
+    || 'Jamaah';
+  const initial = name.trim().charAt(0).toUpperCase();
+
+  // Header & hero
+  $('hiName').textContent = name.split(' ')[0];
+  $('heroName').textContent = name;
+  $('heroAv').textContent = initial;
+  $('pName').textContent = name;
+  $('pAv').textContent = initial;
+
+  // Email
+  if (user?.email) {
+    $('pEmail').textContent = user.email;
+    $('fEmail').value = user.email;
+  }
+
+  // Isi form profil
+  $('fName').value      = profile.full_name  || name;
+  $('fPhone').value     = profile.phone       || '';
+  $('fDob').value       = profile.birth_date  || '';
+  $('fCity').value      = profile.city        || '';
+  $('fPassport').value  = profile.passport_no || '';
+
+  // Referral code
+  const refCode = profile.referral_code || '—';
+  if ($('refCode')) $('refCode').textContent = refCode;
+
+  // Level & poin dari database
+  const level  = profile.level  ?? 'Mitra Gold';
+  const points = profile.points ?? 0;
+
+  // Update level badge
+  document.querySelectorAll('.level-badge').forEach(el => {
+    el.textContent = '✦ ' + level;
+  });
+  // Update tag level di profil header
+  const tagEl = document.querySelector('.profile-head .tag');
+  if (tagEl) tagEl.textContent = '✦ ' + level;
+
+  // Update stat "Total Poin" di beranda
+  const statPoin = document.querySelector('#page-home .stat-grid .stat:first-child .v');
+  if (statPoin) statPoin.textContent = points.toLocaleString('id-ID');
+
+  // Update saldo poin di halaman reward
+  $('pointBal').textContent = points.toLocaleString('id-ID');
+
+  $('inpPass').value = '';
   go('portal');
   goPage('home');
-  // animate level bar
-  setTimeout(()=>{$('lvlBar').style.width=Math.round(4820/7500*100)+'%';},250);
+
+  // Animate level bar
+  const threshold = 7500;
+  setTimeout(() => {
+    $('lvlBar').style.width = Math.min(Math.round(points / threshold * 100), 100) + '%';
+  }, 250);
 }
 
 async function doLogout(){
@@ -667,12 +706,40 @@ function filterHist(f,el){
 }
 
 /* ===== PROFILE ===== */
-function saveProfile(){
-  const nm=$('fName').value.trim()||'Rio Kurniawan';
-  const initial=nm.charAt(0).toUpperCase();
-  $('pName').textContent=nm;$('heroName').textContent=nm;
-  $('hiName').textContent=nm.split(' ')[0];
-  $('pAv').textContent=initial;$('heroAv').textContent=initial;
+async function saveProfile(){
+  if (!sb) { toast('Koneksi Supabase belum siap.'); return; }
+
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { toast('Sesi habis. Silakan masuk kembali.'); return; }
+
+  const payload = {
+    full_name:   $('fName').value.trim(),
+    phone:       $('fPhone').value.trim(),
+    birth_date:  $('fDob').value   || null,
+    city:        $('fCity').value.trim(),
+    passport_no: $('fPassport').value.trim(),
+    updated_at:  new Date().toISOString(),
+  };
+
+  const { error } = await sb
+    .from('profiles')
+    .update(payload)
+    .eq('id', user.id);
+
+  if (error) {
+    console.error(error);
+    toast('Gagal menyimpan profil: ' + error.message);
+    return;
+  }
+
+  // Update tampilan
+  const nm = payload.full_name || 'Jamaah';
+  const initial = nm.charAt(0).toUpperCase();
+  $('pName').textContent    = nm;
+  $('heroName').textContent = nm;
+  $('hiName').textContent   = nm.split(' ')[0];
+  $('pAv').textContent      = initial;
+  $('heroAv').textContent   = initial;
   toast('Profil berhasil diperbarui ✓');
 }
 
