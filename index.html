@@ -346,8 +346,11 @@ body{
         </div>
         <span class="level-badge">✦ Mitra Gold</span>
         <div class="level-bar-wrap">
-          <div class="level-bar-top"><span>Menuju <b>Mitra Platinum</b></span><span><b>4.820</b> / 7.500 poin</span></div>
-          <div class="level-bar"><i id="lvlBar" style="width:0"></i></div>
+          <div class="level-bar-top">
+  <span>Menuju <b id="nextLevel">Mitra Platinum</b></span>
+  <span><b id="heroPoints">0</b> / 7.500 poin</span>
+</div>
+           
           <div class="level-hint">Kumpulkan 2.680 poin lagi untuk naik level &amp; komisi lebih besar.</div>
         </div>
       </div>
@@ -630,6 +633,10 @@ async function enterPortal(user){
   // Level & poin dari database
   const level  = profile.level  ?? 'Mitra Gold';
   const points = profile.points ?? 0;
+   if ($('heroPoints')) {
+  $('heroPoints').textContent =
+    points.toLocaleString('id-ID');
+}
 
   // Update level badge
   document.querySelectorAll('.level-badge').forEach(el => {
@@ -651,10 +658,7 @@ async function enterPortal(user){
   goPage('home');
 
   // Animate level bar
-  const threshold = 7500;
-  setTimeout(() => {
-    $('lvlBar').style.width = Math.min(Math.round(points / threshold * 100), 100) + '%';
-  }, 250);
+
 }
 
 async function doLogout(){
