@@ -655,7 +655,7 @@ async function enterPortal(user){
 
   const { data: summary, error } =
     await sb.rpc('get_my_summary');
-console.log("SUMMARY", summary);
+console.log(JSON.stringify(summary, null, 2));
 console.log("ERROR", error);
 
   if(!error && summary){
