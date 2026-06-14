@@ -651,60 +651,29 @@ async function enterPortal(user){
   // Level & poin dari database
   const level  = profile.level  ?? 'Mitra Gold';
   const points = profile.points ?? 0;
-   try {
-
-  const { data: summary, error } =
-     const {
-  data: { user }
-} = await sb.auth.getUser();
-
-console.log("USER", user);
-      const { data: summary, error } =
-  await sb.rpc("get_my_summary");
-
-try {
+  try {
 
   const { data: summary, error } =
     await sb.rpc("get_my_summary");
 
-  if(!error && summary){
+  if (!error && summary) {
 
-    if($("#homePoints"))
+    if ($("#homePoints"))
       $("#homePoints").textContent =
         (summary.lifetime || 0).toLocaleString("id-ID");
 
-    if($("#homeReferrals"))
+    if ($("#homeReferrals"))
       $("#homeReferrals").textContent =
         summary.referral_active || 0;
 
-    if($("#homeCommission"))
+    if ($("#homeCommission"))
       $("#homeCommission").textContent =
         "Rp " + ((summary.spendable || 0) * 1000)
           .toLocaleString("id-ID");
 
   }
 
-}catch(e){
-  console.warn(e);
-}
-  if(!error && summary){
-
-    if($('#homePoints'))
-      $('#homePoints').textContent =
-        (summary.lifetime || 0).toLocaleString('id-ID');
-
-    if($('#homeReferrals'))
-      $('#homeReferrals').textContent =
-        summary.referral_active || 0;
-
-    if($('#homeCommission'))
-      $('#homeCommission').textContent =
-        'Rp ' + ((summary.spendable || 0) * 1000)
-          .toLocaleString('id-ID');
-
-  }
-
-}catch(e){
+} catch(e) {
   console.warn(e);
 }
    if ($('heroPoints')) {
