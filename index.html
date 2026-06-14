@@ -662,12 +662,31 @@ console.log("USER", user);
       const { data: summary, error } =
   await sb.rpc("get_my_summary");
 
-console.log("SUMMARY", summary);
-console.log("ERROR", error);
-    await sb.rpc('get_my_summary');
-console.log(JSON.stringify(summary, null, 2));
-console.log("ERROR", error);
+try {
 
+  const { data: summary, error } =
+    await sb.rpc("get_my_summary");
+
+  if(!error && summary){
+
+    if($("#homePoints"))
+      $("#homePoints").textContent =
+        (summary.lifetime || 0).toLocaleString("id-ID");
+
+    if($("#homeReferrals"))
+      $("#homeReferrals").textContent =
+        summary.referral_active || 0;
+
+    if($("#homeCommission"))
+      $("#homeCommission").textContent =
+        "Rp " + ((summary.spendable || 0) * 1000)
+          .toLocaleString("id-ID");
+
+  }
+
+}catch(e){
+  console.warn(e);
+}
   if(!error && summary){
 
     if($('#homePoints'))
