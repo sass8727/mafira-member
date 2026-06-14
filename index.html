@@ -654,6 +654,16 @@ async function enterPortal(user){
    try {
 
   const { data: summary, error } =
+     const {
+  data: { user }
+} = await sb.auth.getUser();
+
+console.log("USER", user);
+      const { data: summary, error } =
+  await sb.rpc("get_my_summary");
+
+console.log("SUMMARY", summary);
+console.log("ERROR", error);
     await sb.rpc('get_my_summary');
 console.log(JSON.stringify(summary, null, 2));
 console.log("ERROR", error);
